@@ -31,14 +31,12 @@ This is a full-stack AI application that converts natural language questions int
 
 ```mermaid
 flowchart LR
-    A[User] -->|1. Upload CSV & Ask Question| B("Next.js Frontend")
-    B -->|2. API Request (File + Question)| C("FastAPI Backend")
-    C -->|3. Create In-Memory DB & Build Prompt| C
-    C -->|4. Send Prompt (Schema + Question)| D[Google Gemini API]
-    D -->|5. Return SQL Query & Explanation| C
-    C -->|6. Execute SQL on In-Memory DB| C
-    C -->|7. Send JSON Response (Query + Results)| B
-    B -->|8. Display Query, Explanation & Data| A
+    A["User"] -->|Upload Text / File| B["React Frontend"]
+    B -->|API Request| C["FastAPI Backend"]
+    C -->|Summarization| D["OpenAI API"]
+    C -->|Send Email| E["SMTP (Gmail)"]
+    C -->|Response| B
+    B -->|Summary Display / Edit| A
 ```
 
 ## Local Setup & Installation
