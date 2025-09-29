@@ -3,7 +3,6 @@
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Github, Linkedin, FileText, Rocket, Target, PenTool, Server, BrainCircuit, CheckCircle, Heart, Coffee, Zap, Star, Award, Users, Calendar, MapPin, Mail, Phone, Globe, Download, ExternalLink, Sparkles, Code2, Trophy, Clock, TrendingUp, BookOpen, Lightbulb, Timer, Layers, Brain, Calendar as CalendarIcon } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 
@@ -195,7 +194,7 @@ export default function AboutPage() {
   const [heroRef, heroInView] = useInView(0.1);
   const [timelineRef, timelineInView] = useInView(0.2);
 
-  // NEW: image source from env with fallback to local placeholder
+  // image source from env with fallback to local placeholder
   const profileSrc = process.env.NEXT_PUBLIC_PROFILE_IMG || "/placeholder-avatar.png";
 
   return (
@@ -260,9 +259,8 @@ export default function AboutPage() {
             <div className="relative w-80 h-80 mx-auto">
               <div className="w-full h-full bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md rounded-full border-4 border-primary/30 shadow-2xl group-hover:scale-105 transition-all duration-500 flex flex-col items-center justify-center p-8">
                 <div className="relative mb-4">
-                  {/* UPDATED: image uses env var with fallback */}
-                  {/* If Drive gives issues with next/image, replace <Image> with plain <img> using the same src */}
-                  <Image 
+                  {/* Plain img: no Next/Image optimizer */}
+                  <img 
                     src={profileSrc}
                     alt="Tejas Bhise" 
                     width={120} 
@@ -328,7 +326,7 @@ export default function AboutPage() {
 
           <div className="relative group h-full">
             <div className="absolute inset-0 bg-gradient-to-r from-teal-500/20 to-green-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
-            <div className="relative h-full p-8 bg-card/80 backdrop-blur-md border-2 border-primary/20 rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+            <div className="relative h-full p-8 bg-card/80 backdrop-blur-md border-2 border-primary/20 rounded-3xl shadow-2xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
               <div className="w-16 h-16 bg-gradient-to-r from-teal-500 to-green-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                 <Lightbulb className="w-8 h-8 text-white" />
               </div>
