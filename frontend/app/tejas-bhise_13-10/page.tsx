@@ -25,7 +25,7 @@ export default function AdminPage() {
 
   // Fetch feedbacks
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/feedbacks/`)
+    fetch('http://localhost:8000/feedbacks/')
       .then(res => res.json())
       .then(data => {
         setFeedbacks(data.feedbacks || []);
@@ -87,7 +87,7 @@ export default function AdminPage() {
     
     setDeleting(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/feedback/${deleteModal.id}`, {
+      const response = await fetch(`http://localhost:8000/feedback/${deleteModal.id}`, {
         method: 'DELETE',
       });
       
