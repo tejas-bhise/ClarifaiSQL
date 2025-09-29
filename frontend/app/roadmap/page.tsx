@@ -3,6 +3,7 @@
 import { CheckCircle, FilePlus, PieChart, Database, Rocket } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LucideIcon } from "lucide-react";
+import { useRouter } from "next/navigation"; // ✅ Add this import
 
 // Define proper types
 interface RoadmapPhase {
@@ -191,6 +192,12 @@ function RoadmapItem({ phase, index, delay }: RoadmapItemProps) {
 
 export default function RoadmapPage() {
     const [headerRef, headerInView] = useInView(0.1);
+    const router = useRouter(); // ✅ Add this hook
+
+    // ✅ Add navigation function
+    const handleFeedbackClick = () => {
+        router.push('/feedback');
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -249,7 +256,11 @@ export default function RoadmapPage() {
                         <p className="text-muted-foreground mb-6">
                             Be part of the future of data analysis. Your feedback shapes our roadmap.
                         </p>
-                        <button className="px-8 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
+                        {/* ✅ Updated button with navigation */}
+                        <button 
+                            onClick={handleFeedbackClick}
+                            className="px-8 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+                        >
                             Share Feedback
                         </button>
                     </div>
