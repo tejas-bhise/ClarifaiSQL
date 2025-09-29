@@ -44,7 +44,7 @@ app = FastAPI(
 # Add CORS middleware for local development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000","https://clarifaisql-825ejabsh-tejas-bhises-projects.vercel.app"],  # Allow frontend origin
+    allow_origins=["http://localhost:3000","https://clarifaisql-7qann523l-tejas-bhises-projects.vercel.app"],  # Allow frontend origin
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
