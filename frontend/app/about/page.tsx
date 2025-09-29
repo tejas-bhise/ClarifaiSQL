@@ -197,7 +197,13 @@ export default function AboutPage() {
 
   // NEW: image source from env with fallback to local placeholder
   const profileSrc = process.env.NEXT_PUBLIC_PROFILE_IMG || "/placeholder-avatar.png";
-
+  <img
+  src={profileSrc}
+  alt="Tejas Bhise"
+  width={120}
+  height={120}
+  className="w-30 h-30 rounded-full object-cover border-4 border-background shadow-2xl"
+/>
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 overflow-hidden relative">
       {/* Interactive Background */}
