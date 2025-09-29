@@ -197,13 +197,7 @@ export default function AboutPage() {
 
   // NEW: image source from env with fallback to local placeholder
   const profileSrc = process.env.NEXT_PUBLIC_PROFILE_IMG || "/placeholder-avatar.png";
-  <img
-  src={profileSrc}
-  alt="Tejas Bhise"
-  width={120}
-  height={120}
-  className="w-30 h-30 rounded-full object-cover border-4 border-background shadow-2xl"
-/>
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 overflow-hidden relative">
       {/* Interactive Background */}
@@ -230,7 +224,7 @@ export default function AboutPage() {
       }} />
       
       <div className="container mx-auto py-20 px-4 space-y-32 relative z-10">
-        {/* Enhanced Hero Section with Typing Animation */}
+        {/* Enhanced Hero Section with Typing Animation */} 
         <section 
           ref={heroRef}
           className={`flex flex-col items-center text-center gap-16 transition-all duration-1000 ease-out ${
@@ -303,7 +297,7 @@ export default function AboutPage() {
                 <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-20 rounded-2xl blur-xl transition-all duration-300`}></div>
                 
                 <div className="relative text-center p-6 bg-card/80 backdrop-blur-md border-2 border-primary/20 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                  <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                  <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}> 
                     <stat.icon className="w-6 h-6 text-white" />
                   </div>
                   <AnimatedCounter end={stat.value} suffix={stat.suffix} />
