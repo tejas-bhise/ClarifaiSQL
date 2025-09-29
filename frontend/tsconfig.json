@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "target": "ES2017",
     "lib": [
       "dom",
       "dom.iterable",
@@ -16,11 +17,6 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "baseUrl": ".",
     "paths": {
       "@/": [
@@ -33,12 +29,18 @@
         "./app/lib/"
       ]
     },
-    "target": "ES2017"
+    "types": [
+      "node"
+    ], // ✅ Added Node types
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
-    ".next/types//*.ts",
-    "/*.ts",
-    "/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
     "next-env.d.ts",
     ".next/types/**/*.ts"
   ],

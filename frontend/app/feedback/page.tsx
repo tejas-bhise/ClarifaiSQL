@@ -51,7 +51,7 @@ Message: ${formData.message}`;
             submitData.append('message', fullMessage);
 
             // Submit to your backend API
-            const response = await fetch('http://localhost:8000/feedback/', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/feedback/`, {
                 method: 'POST',
                 body: submitData,
             });

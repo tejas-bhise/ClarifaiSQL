@@ -212,7 +212,7 @@ export default function AIToolPage() {
     formData.append("query", query);
 
     try {
-      const response = await fetch("http://localhost:8000/process-query/", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/process-query/`, {
         method: "POST",
         body: formData,
       });
