@@ -36,7 +36,8 @@ export default function AdminPage() {
     setAuthError('');
 
     try {
-      const response = await fetch('http://localhost:8000/admin/verify', {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/admin/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
