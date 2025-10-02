@@ -39,7 +39,6 @@ flowchart LR
     C2 -->|6. Execute SQL on In-Memory DB| C3[SQLite In-Memory DB]
     C3 -->|7. Send JSON Response with Query and Results| B
     B -->|8. Display Query, Explanation and Data| A
-
 ```
 
 ## Local Setup & Installation
