@@ -11,6 +11,9 @@ interface Feedback {
 }
 
 export default function AdminPage() {
+  // ✅ Define API_URL at the component level so all functions can use it
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [filteredFeedbacks, setFilteredFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(false);
@@ -36,7 +39,6 @@ export default function AdminPage() {
     setAuthError('');
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await fetch(`${API_URL}/admin/verify`, {
         method: 'POST',
         headers: {
@@ -63,7 +65,7 @@ export default function AdminPage() {
   const fetchFeedbacks = async (key: string) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/admin/feedbacks', {
+      const response = await fetch(`${API_URL}/admin/feedbacks`, {  // ✅ Fixed - using API_URL
         headers: {
           'X-Admin-Key': key,
         },
@@ -144,7 +146,7 @@ export default function AdminPage() {
     
     setDeleting(true);
     try {
-      const response = await fetch(`http://localhost:8000/admin/feedback/${deleteModal.id}`, {
+      const response = await fetch(`${API_URL}/admin/feedback/${deleteModal.id}`, {  // ✅ Fixed - using API_URL
         method: 'DELETE',
         headers: {
           'X-Admin-Key': adminKey,
