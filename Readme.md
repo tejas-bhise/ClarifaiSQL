@@ -1,14 +1,13 @@
-
 # 🎯 ClarifaiSQL
 
 This is a full-stack AI application that converts natural language questions into SQL queries. Upload your CSV files, ask questions in plain English, and get accurate SQL queries with detailed explanations.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js"/>
-  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
-  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
-  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
-  <img src="https://img.shields.io/badge/TailwindCSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailwindCSS"/>
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js"/>
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
+  <img src="https://img.shields.io/badge/TailwindCSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailwindCSS"/>
 </p>
 
 ## Features
@@ -21,32 +20,27 @@ This is a full-stack AI application that converts natural language questions int
 
 ## Tech Stack
 
-| Category   | Technology                    |
+| Category   | Technology                    |
 |------------|-------------------------------|
-| Frontend   | Next.js 15, TypeScript, TailwindCSS |
-| Backend    | FastAPI, Python 3.11+, Uvicorn  |
-| Database   | SQLite (in-memory)            |
-| AI         | Google Gemini API             |
+| Frontend   | Next.js 15, TypeScript, TailwindCSS |
+| Backend    | FastAPI, Python 3.11+, Uvicorn  |
+| Database   | SQLite (in-memory)            |
+| AI         | Google Gemini API             |
 
 ## System Architecture
 
-```
+```mermaid
 flowchart LR
-    A[User] -->|1. Upload CSV and Ask Question| B[Next.js Frontend]
-    B -->|2. API Request with File and Question| C[FastAPI Backend]
-    C -->|3. Create In-Memory DB and Build Prompt| C1[Prompt Builder]
-    C1 -->|4. Send Prompt with Schema and Question| D[Google Gemini API]
-    D -->|5. Return SQL Query and Explanation| C2[SQL Processor]
-    C2 -->|6. Execute SQL on In-Memory DB| C3[SQLite In-Memory DB]
-    C3 -->|7. Send JSON Response with Query and Results| B
-    B -->|8. Display Query, Explanation and Data| A
+    A[User] -->|1. Upload CSV and Ask Question| B[Next.js Frontend]
+    B -->|2. API Request with File and Question| C[FastAPI Backend]
+    C -->|3. Create In-Memory DB and Build Prompt| C1[Prompt Builder]
+    C1 -->|4. Send Prompt with Schema and Question| D[Google Gemini API]
+    D -->|5. Return SQL Query and Explanation| C2[SQL Processor]
+    C2 -->|6. Execute SQL on In-Memory DB| C3[SQLite In-Memory DB]
+    C3 -->|7. Send JSON Response with Query and Results| B
+    B -->|8. Display Query, Explanation and Data| A
+
 ```
-
-## Live Demo
-
-Experience the application online at the following link:
-
-[ClarifaiSQL Live Application](https://clarifaisql-7qann523l-tejas-bhises-projects.vercel.app?_vercel_share=zUmCnZquxciESl8boaC4GqVMYACsl9ep)
 
 ## Local Setup & Installation
 
@@ -75,10 +69,8 @@ Create and activate a virtual environment:
 
 ```
 python -m venv .venv
-# On Windows
-.venv\Scripts\activate
-# On macOS/Linux
-source .venv/bin/activate
+.venv\Scripts\activate  # On Windows
+source .venv/bin/activate  # On macOS/Linux
 ```
 
 Install dependencies:
@@ -115,42 +107,40 @@ Install dependencies:
 npm install
 ```
 
-Start the React development server:
+Start the React server:
 
 ```
 npm run dev
 ```
 
-It will run at [http://localhost:3000](http://localhost:3000).
+It will run at http://localhost:3000.
 
 ## Project Structure
 
 ```
 CLARIFAISQL-MONOREPO/
 ├── backend/
-│   ├── main.py
-│   ├── requirements.txt
+│   ├── main.py
+│   ├── requirements.txt
 │ 
 └── frontend/
-    ├── app/
-    ├── components/
-    ├── public/
-    ├── package.json
-    └── next.config.ts
+    ├── app/
+    ├── components/
+    ├── public/
+    ├── package.json
+    └── next.config.ts
 ```
 
 ## How It Works
 
-1. **Upload CSV**: User uploads CSV file through the React frontend.
-2. **Ask Questions**: User types natural language questions about the data.
-3. **API Processing**: Frontend sends request to FastAPI backend.
-4. **AI Generation**: Backend uses Gemini API to convert question to SQL.
-5. **Database Query**: Generated SQL is executed against SQLite database.
-6. **Results Display**: Frontend shows SQL query, explanation, and results.
+1. **Upload CSV**: User uploads CSV file through the React frontend
+2. **Ask Questions**: User types natural language questions about the data
+3. **API Processing**: Frontend sends request to FastAPI backend
+4. **AI Generation**: Backend uses Gemini API to convert question to SQL
+5. **Database Query**: Generated SQL is executed against SQLite database
+6. **Results Display**: Frontend shows SQL query, explanation, and results
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is under the MIT License. See the LICENSE file for details.
 ```
-
-This version integrates the live demo link under a well-titled "Live Demo" section, with a formal presentation suitable for professional documentation. Let me know if further refinements are needed.

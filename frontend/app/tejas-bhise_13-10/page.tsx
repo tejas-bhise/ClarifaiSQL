@@ -13,29 +13,85 @@ interface Feedback {
 export default function AdminPage() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [filteredFeedbacks, setFilteredFeedbacks] = useState<Feedback[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [deleteModal, setDeleteModal] = useState<{show: boolean, id: number | null}>({show: false, id: null});
   const [deleting, setDeleting] = useState(false);
+  
+  // Authentication states
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminKey, setAdminKey] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authenticating, setAuthenticating] = useState(false);
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
   const [phoneFilter, setPhoneFilter] = useState('all');
 
-  // Fetch feedbacks
-  useEffect(() => {
-    fetch('http://localhost:8000/feedbacks/')
-      .then(res => res.json())
-      .then(data => {
+  // Handle admin authentication
+  const handleAuthentication = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthenticating(true);
+    setAuthError('');
+
+    try {
+      const response = await fetch('http://localhost:8000/admin/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Key': adminKey,
+        },
+      });
+
+      if (response.ok) {
+        setIsAuthenticated(true);
+        localStorage.setItem('admin_key', adminKey);
+        fetchFeedbacks(adminKey);
+      } else {
+        setAuthError('Invalid admin key. Access denied.');
+      }
+    } catch (err) {
+      setAuthError('Connection error. Please try again.');
+    } finally {
+      setAuthenticating(false);
+    }
+  };
+
+  // Fetch feedbacks with admin key
+  const fetchFeedbacks = async (key: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:8000/admin/feedbacks', {
+        headers: {
+          'X-Admin-Key': key,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
         setFeedbacks(data.feedbacks || []);
         setFilteredFeedbacks(data.feedbacks || []);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError('Backend not running');
-        setLoading(false);
-      });
+      } else {
+        setError('Failed to load feedbacks');
+        setIsAuthenticated(false);
+        localStorage.removeItem('admin_key');
+      }
+    } catch (err) {
+      setError('Backend not running');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Check for saved admin key on mount
+  useEffect(() => {
+    const savedKey = localStorage.getItem('admin_key');
+    if (savedKey) {
+      setAdminKey(savedKey);
+      setIsAuthenticated(true);
+      fetchFeedbacks(savedKey);
+    }
   }, []);
 
   // Apply filters
@@ -87,8 +143,11 @@ export default function AdminPage() {
     
     setDeleting(true);
     try {
-      const response = await fetch(`http://localhost:8000/feedback/${deleteModal.id}`, {
+      const response = await fetch(`http://localhost:8000/admin/feedback/${deleteModal.id}`, {
         method: 'DELETE',
+        headers: {
+          'X-Admin-Key': adminKey,
+        },
       });
       
       if (response.ok) {
@@ -96,7 +155,7 @@ export default function AdminPage() {
         setDeleteModal({show: false, id: null});
         alert('✅ Feedback deleted successfully!');
       } else {
-        alert('❌ Failed to delete feedback. Please check your backend.');
+        alert('❌ Failed to delete feedback. Unauthorized or error.');
       }
     } catch (error) {
       alert('❌ Network error. Please try again.');
@@ -111,6 +170,58 @@ export default function AdminPage() {
     setPhoneFilter('all');
   };
 
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setAdminKey('');
+    setFeedbacks([]);
+    setFilteredFeedbacks([]);
+    localStorage.removeItem('admin_key');
+  };
+
+  // Authentication Screen
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="bg-card rounded-lg shadow-lg border max-w-md w-full p-8">
+          <div className="text-center mb-6">
+            <div className="text-5xl mb-4">🔐</div>
+            <h1 className="text-2xl font-bold mb-2">Admin Access Required</h1>
+            <p className="text-muted-foreground">Enter your secret admin key to view feedbacks</p>
+          </div>
+
+          <form onSubmit={handleAuthentication} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Admin Key</label>
+              <input
+                type="password"
+                value={adminKey}
+                onChange={(e) => setAdminKey(e.target.value)}
+                placeholder="Enter your secret admin key"
+                className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                required
+              />
+            </div>
+
+            {authError && (
+              <div className="bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
+                {authError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={authenticating}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50"
+            >
+              {authenticating ? 'Verifying...' : 'Access Dashboard'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading State
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -122,6 +233,7 @@ export default function AdminPage() {
     );
   }
 
+  // Error State
   if (error) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -130,16 +242,17 @@ export default function AdminPage() {
           <h2 className="text-xl font-semibold mb-2">Connection Error</h2>
           <p className="text-muted-foreground mb-4">{error}</p>
           <button 
-            onClick={() => window.location.reload()} 
+            onClick={handleLogout} 
             className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-colors"
           >
-            Retry
+            Back to Login
           </button>
         </div>
       </div>
     );
   }
 
+  // Main Dashboard
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -154,12 +267,18 @@ export default function AdminPage() {
               </h1>
               <p className="text-muted-foreground mt-2">Manage and review user feedback</p>
             </div>
-            <div className="mt-4 sm:mt-0">
+            <div className="mt-4 sm:mt-0 flex items-center gap-4">
               <div className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-2">
                 <span className="text-sm font-medium text-primary">
                   📊 {filteredFeedbacks.length} of {feedbacks.length} feedbacks
                 </span>
               </div>
+              <button
+                onClick={handleLogout}
+                className="bg-red-100 hover:bg-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                🚪 Logout
+              </button>
             </div>
           </div>
         </div>
