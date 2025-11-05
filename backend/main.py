@@ -340,23 +340,24 @@ Focus on accuracy and provide meaningful insights about the data structure and q
 """
         
         # ✅ CRITICAL: Aggressive timeout + retry logic
-        api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+        api_url = f"https://generativelanguage.googleapis.com/v1/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+
         payload = {
-            "contents": [{"parts": [{"text": llm_prompt}]}],
-            "generationConfig": {
-                "responseMimeType": "application/json",
-                "responseSchema": {
-                    "type": "OBJECT",
-                    "properties": {
-                        "generated_sql": {"type": "STRING"},
-                        "explanation": {"type": "STRING"}
-                    },
-                    "required": ["generated_sql", "explanation"]
-                },
-                "temperature": 0.1,
-                "maxOutputTokens": 800  # ✅ Reduced from 1024 to 800
-            }
-        }
+    "contents": [{"parts": [{"text": llm_prompt}]}],
+    "generationConfig": {
+        "responseMimeType": "application/json",
+        "responseSchema": {
+            "type": "OBJECT",
+            "properties": {
+                "generated_sql": {"type": "STRING"},
+                "explanation": {"type": "STRING"}
+            },
+            "required": ["generated_sql", "explanation"]
+        },
+        "temperature": 0.1,
+        "maxOutputTokens": 800
+    }
+}
         
         logger.info("Calling Gemini API...")
         api_start = time.time()
