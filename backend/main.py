@@ -82,9 +82,11 @@ init_feedback_db()
 # --- Helper Functions & LLM Fallback Logic ---
 
 # Initialize Groq Client
-import os
-
 groq_api_key = os.getenv("GROQ_API_KEY")
+
+groq_client = None
+if groq_api_key:
+    groq_client = Groq(api_key=groq_api_key)
 
 def ask_llm(prompt):
     """Try Gemini first, fallback to Groq if it fails (e.g., Quota limits)."""

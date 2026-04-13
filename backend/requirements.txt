@@ -1,3 +1,4 @@
+
 fastapi
 uvicorn[standard]
 python-dotenv
@@ -6,3 +7,5 @@ numpy
 httpx
 python-multipart
 python-jose[cryptography]==3.3.0
+google-genai
+groq
