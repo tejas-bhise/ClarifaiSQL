@@ -4,7 +4,8 @@ import pandas as pd
 from fastapi import FastAPI, UploadFile, Form, File, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import httpx
+from google import genai
+from groq import Groq
 from dotenv import load_dotenv
 import json
 import numpy as np
@@ -50,8 +51,6 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",  # Local development
         "https://clarifaisql.vercel.app",  # UPDATE THIS WITH YOUR ACTUAL VERCEL URL
-        # Add more frontend URLs if needed:
-        # "https://your-custom-domain.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -80,7 +79,36 @@ def init_feedback_db():
 
 init_feedback_db()
 
-# --- Helper Functions ---
+# --- Helper Functions & LLM Fallback Logic ---
+
+# Initialize Groq Client
+import os
+
+groq_api_key = os.getenv("GROQ_API_KEY")
+
+def ask_llm(prompt):
+    """Try Gemini first, fallback to Groq if it fails (e.g., Quota limits)."""
+    try:
+        # Initialize Gemini inside the function using the loaded API key
+        client = genai.Client(api_key=GEMINI_API_KEY)
+        response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=prompt,
+    config={
+        "temperature": 0.0,
+    }
+)
+        return response.text
+    except Exception as e:
+        print(f"Gemini failed ({str(e)}) → switching to Groq")
+        completion = groq_client.chat.completions.create(
+    model="llama-3.1-8b-instant",
+    messages=[
+        {"role": "user", "content": prompt}
+    ]
+)
+        return completion.choices[0].message.content
+
 def verify_admin_key(admin_key: Optional[str]) -> bool:
     """Verify if the provided admin key matches the environment variable."""
     if not admin_key:
@@ -375,7 +403,7 @@ async def process_query(
         if not schema_info:
             raise HTTPException(status_code=500, detail="Failed to analyze database schema")
         
-        # ===== YOUR ORIGINAL OPTIMIZED PROMPT (100% ACCURATE) =====
+        # ===== OPTIMIZED PROMPT =====
         llm_prompt = f"""
 You are an expert SQL analyst and data interpreter. You have been given a database table with the following comprehensive schema:
 
@@ -393,49 +421,75 @@ SAMPLE DATA (first 3 rows):
 USER QUESTION: "{query}"
 
 INSTRUCTIONS:
-1. Generate a precise SQLite query that answers the user's question
-2. Use the EXACT table name "{table_name}" in your query
-3. Use EXACT column names from the schema above
-4. Create a detailed, professional explanation that:
-   - Explains what the query does step-by-step
-   - Mentions the specific columns and table being used
-   - Describes the business logic and reasoning
-   - Uses real-world context based on the data type
-5. If the question cannot be answered with the available data, explain why
 
-Your response MUST be a valid JSON object with these exact keys:
-- "generated_sql": The complete SQLite query string
-- "explanation": A comprehensive, professional explanation (3-4 sentences minimum)
+You are a senior data analyst generating production-quality SQL.
 
-Focus on accuracy and provide meaningful insights about the data structure and query logic.
+Your task is to convert the user's question into an accurate SQLite query using ONLY the provided schema.
+
+RULES FOR SQL:
+1. Generate ONLY valid SQLite SQL syntax.
+2. Use the EXACT table name "{table_name}".
+3. Column names may contain spaces or long text.
+
+Always wrap column names in double quotes "" exactly as provided in schema.
+
+Example:
+SELECT "Name of Organization" FROM "{table_name}"
+
+Never shorten or modify column names.
+
+If column meaning is unclear, choose the closest semantic match from schema.
+4. NEVER invent columns that do not exist.
+5. NEVER invent tables that do not exist.
+6. NEVER guess missing data.
+7. Prefer simple and correct SQL over complex SQL.
+8. Ensure the query executes successfully in SQLite.
+9. Use correct aggregation functions when required:
+   COUNT, AVG, SUM, MIN, MAX.
+10. When using aggregations, provide readable aliases using AS.
+11. For filtering, use correct WHERE conditions.
+12. For sorting, use ORDER BY.
+13. For limits, use LIMIT.
+14. If question cannot be answered from available columns, clearly explain why instead of guessing.
+
+RULES FOR EXPLANATION:
+1. Write in a professional and technical tone.
+2. Explain what the SQL query does logically.
+3. Mention relevant columns and operations.
+4. Keep explanation factual and concise.
+5. Do NOT add assumptions beyond available data.
+6. Do NOT fabricate insights not supported by data.
+
+STRICT OUTPUT FORMAT:
+Return ONLY a valid JSON object.
+
+DO NOT include markdown.
+DO NOT include commentary outside JSON.
+DO NOT include extra text before or after JSON.
+
+JSON format must be EXACT:
+
+{{
+  "generated_sql": "SQL query here",
+  "explanation": "Professional explanation here"
+}}
 """
-        # ===== END ORIGINAL PROMPT =====
+        # ===== EXACT SOLUTION IMPLEMENTATION: GROQ FALLBACK =====
+        text = ask_llm(llm_prompt)
         
-        api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
-        
-        payload = {
-            "contents": [{"parts": [{"text": llm_prompt}]}],
-            "generationConfig": {
-                "responseMimeType": "application/json",
-                "responseSchema": {
-                    "type": "OBJECT",
-                    "properties": {
-                        "generated_sql": {"type": "STRING"},
-                        "explanation": {"type": "STRING"}
-                    },
-                    "required": ["generated_sql", "explanation"]
-                },
-                "temperature": 0.1,
-                "maxOutputTokens": 2048
-            }
-        }
-        
-        async with httpx.AsyncClient() as client:
-            response = await client.post(api_url, json=payload, timeout=60.0)
-            response.raise_for_status()
-            llm_data = response.json()
-            llm_response_text = llm_data['candidates'][0]['content']['parts'][0]['text']
-            llm_json = json.loads(llm_response_text)
+        # Clean markdown wrapper if the model returns it
+        clean_text = text.strip()
+
+# remove markdown
+        clean_text = clean_text.replace("```json", "").replace("```", "").strip()
+
+# extract JSON safely
+        start = clean_text.find("{")
+        end = clean_text.rfind("}") + 1
+
+        clean_text = clean_text[start:end]
+
+        llm_json = json.loads(clean_text)
         
         sql_query = llm_json.get("generated_sql", "").strip()
         explanation = llm_json.get("explanation", "").strip()
@@ -444,6 +498,18 @@ Focus on accuracy and provide meaningful insights about the data structure and q
             raise HTTPException(status_code=400, detail="The AI could not generate a valid SQL query for this question.")
         
         result_df, query_error = run_sql_query(conn, sql_query)
+        # basic SQL safety validation
+        for col in schema_info["columns"]:
+            pass
+
+        if "DROP " in sql_query.upper():
+            raise Exception("Unsafe SQL detected")
+
+        if "DELETE " in sql_query.upper():
+            raise Exception("Unsafe SQL detected")
+
+        if "UPDATE " in sql_query.upper():
+            raise Exception("Unsafe SQL detected")
         conn.close()
         
         if query_error:

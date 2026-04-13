@@ -42,7 +42,6 @@ export default function RootLayout({
           </div>
         </ThemeProvider>
 
-        {/* Vercel Analytics */}
         <Analytics />
       </body>
     </html>
